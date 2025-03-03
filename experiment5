@@ -1,0 +1,164 @@
+import java.io.*;
+import java.util.*;
+
+// Easy Level: Sum using Autoboxing & Unboxing
+class SumCalculator {
+    static int calculateSum(List<Integer> numbers) {
+        int sum = 0;
+        for (Integer num : numbers) { // Unboxing
+            sum += num;
+        }
+        return sum;
+    }
+
+    static Integer parseStringToInteger(String str) {
+        return Integer.parseInt(str); // Wrapper class parsing
+    }
+}
+
+// Medium Level: Serialization & Deserialization of Student
+class Student implements Serializable {
+    private static final long serialVersionUID = 1L;
+    int id;
+    String name;
+    double gpa;
+
+    Student(int id, String name, double gpa) {
+        this.id = id;
+        this.name = name;
+        this.gpa = gpa;
+    }
+
+    @Override
+    public String toString() {
+        return "ID: " + id + ", Name: " + name + ", GPA: " + gpa;
+    }
+
+    static void serializeStudent(Student student, String filename) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filename))) {
+            oos.writeObject(student);
+            System.out.println("Student serialized successfully.");
+        } catch (IOException e) {
+            System.out.println("Error during serialization: " + e.getMessage());
+        }
+    }
+
+    static Student deserializeStudent(String filename) {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filename))) {
+            return (Student) ois.readObject();
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found.");
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("Error during deserialization: " + e.getMessage());
+        }
+        return null;
+    }
+}
+
+// Hard Level: Menu-based Employee Management
+class Employee implements Serializable {
+    private static final long serialVersionUID = 1L;
+    int id;
+    String name, designation;
+    double salary;
+
+    Employee(int id, String name, String designation, double salary) {
+        this.id = id;
+        this.name = name;
+        this.designation = designation;
+        this.salary = salary;
+    }
+
+    @Override
+    public String toString() {
+        return "ID: " + id + ", Name: " + name + ", Designation: " + designation + ", Salary: " + salary;
+    }
+}
+
+class EmployeeManager {
+    private static final String FILE_NAME = "employees.dat";
+
+    static void addEmployee(Employee emp) {
+        List<Employee> employees = loadEmployees();
+        employees.add(emp);
+        saveEmployees(employees);
+    }
+
+    static void displayEmployees() {
+        List<Employee> employees = loadEmployees();
+        if (employees.isEmpty()) {
+            System.out.println("No employees found.");
+        } else {
+            for (Employee emp : employees) {
+                System.out.println(emp);
+            }
+        }
+    }
+
+    private static List<Employee> loadEmployees() {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(FILE_NAME))) {
+            return (List<Employee>) ois.readObject();
+        } catch (FileNotFoundException e) {
+            return new ArrayList<>();
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("Error loading employees: " + e.getMessage());
+        }
+        return new ArrayList<>();
+    }
+
+    private static void saveEmployees(List<Employee> employees) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(FILE_NAME))) {
+            oos.writeObject(employees);
+        } catch (IOException e) {
+            System.out.println("Error saving employees: " + e.getMessage());
+        }
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Easy Level: Sum of Integers using Autoboxing & Unboxing
+        List<Integer> numbers = Arrays.asList(SumCalculator.parseStringToInteger("10"),
+                SumCalculator.parseStringToInteger("20"), SumCalculator.parseStringToInteger("30"));
+        System.out.println("Sum of numbers: " + SumCalculator.calculateSum(numbers));
+
+        // Medium Level: Serialization & Deserialization
+        Student student = new Student(1, "John Doe", 3.8);
+        Student.serializeStudent(student, "student.dat");
+        Student deserializedStudent = Student.deserializeStudent("student.dat");
+        System.out.println("Deserialized Student: " + deserializedStudent);
+
+        // Hard Level: Menu-based Employee Management
+        while (true) {
+            System.out.println("\n1. Add Employee\n2. Display All\n3. Exit");
+            System.out.print("Enter choice: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
+
+            if (choice == 1) {
+                System.out.print("Enter ID: ");
+                int id = scanner.nextInt();
+                scanner.nextLine();
+                System.out.print("Enter Name: ");
+                String name = scanner.nextLine();
+                System.out.print("Enter Designation: ");
+                String designation = scanner.nextLine();
+                System.out.print("Enter Salary: ");
+                double salary = scanner.nextDouble();
+                Employee emp = new Employee(id, name, designation, salary);
+                EmployeeManager.addEmployee(emp);
+                System.out.println("Employee added successfully.");
+            } else if (choice == 2) {
+                EmployeeManager.displayEmployees();
+            } else if (choice == 3) {
+                System.out.println("Exiting...");
+                break;
+            } else {
+                System.out.println("Invalid choice. Try again.");
+            }
+        }
+        scanner.close();
+    }
+}
